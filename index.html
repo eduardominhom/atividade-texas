@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Far West Tours - O Legado do Velho Oeste no Texas</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Rye&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+
+    <style>
+        /* CSS Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cinzel', serif;
+            background: linear-gradient(145deg, #F5DEB3, #DEB887);
+            color: #2F1B14;
+            line-height: 1.6;
+        }
+
+        /* Tipografia e Estilo Temático */
+        h1, h2 {
+            font-family: 'Rye', cursive;
+            text-align: center;
+            color: #8B4513;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Cabeçalho */
+        .header {
+            background: linear-gradient(rgba(139, 69, 19, 0.9), rgba(160, 82, 45, 0.9)), url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+            padding: 2rem 1rem;
+            text-align: center;
+            border-bottom: 5px solid #8B4513;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            color: #FFD700;
+            letter-spacing: 3px;
+        }
+
+        /* Container Principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Seção de Introdução */
+        .introduction {
+            margin-bottom: 3rem;
+            text-align: center;
+            font-size: 1.1rem;
+            color: #654321;
+        }
+
+        /* Seção de Pontos Turísticos */
+        .tourist-spots h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #CD853F;
+            display: inline-block;
+        }
+        
+        .section-title-wrapper {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .spots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .spot-card {
+            background: #F5DEB3;
+            border: 3px solid #8B4513;
+            border-radius: 10px;
+            box-shadow: 5px 5px 15px rgba(47, 27, 20, 0.5);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .spot-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 8px 8px 20px rgba(47, 27, 20, 0.7);
+        }
+
+        .spot-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 3px solid #8B4513;
+        }
+
+        .spot-card-content {
+            padding: 1.5rem;
+        }
+
+        .spot-card h3 {
+            font-family: 'Rye', cursive;
+            color: #D2691E;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .spot-card p.location {
+            font-weight: bold;
+            color: #654321;
+            margin-bottom: 1rem;
+        }
+
+        .spot-card p.description {
+            color: #2F1B14;
+            font-size: 0.95rem;
+        }
+
+        /* Mapa Interativo */
+        #map {
+            height: 500px;
+            width: 100%;
+            border: 5px solid #8B4513;
+            border-radius: 10px;
+            margin-top: 3rem;
+            box-shadow: 5px 5px 15px rgba(47, 27, 20, 0.5);
+        }
+
+        .leaflet-popup-content-wrapper {
+            background: #F5DEB3;
+            color: #2F1B14;
+            border-radius: 8px;
+            border: 2px solid #8B4513;
+        }
+
+        .leaflet-popup-content {
+            font-family: 'Cinzel', serif;
+        }
+        
+        .leaflet-popup-content h4 {
+            font-family: 'Rye', cursive;
+            color: #D2691E;
+            text-align: center;
+        }
+
+        .leaflet-popup-content img {
+            width: 100%;
+            height: auto;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+
+        .leaflet-popup-tip {
+            background: #F5DEB3;
+        }
+
+        /* Rodapé */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+            background: #2F1B14;
+            color: #F5DEB3;
+        }
+
+        /* Layout Responsivo */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            .container {
+                padding: 1rem;
+            }
+            h2 {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+             .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>Far West Tours</h1>
+    </header>
+
+    <main class="container">
+        <section class="introduction">
+            <h2>Reviva a Lenda do Velho Oeste</h2>
+            <p>
+                Bem-vindo à Far West Tours, sua porta de entrada para a era lendária de cowboys, foras da lei e pioneiros que forjaram a história do Texas. Prepare-se para uma viagem no tempo, explorando os cenários autênticos onde o espírito indomável do Velho Oeste ainda vive. De batalhas históricas a cidades que prosperaram com o gado, cada parada é um capítulo de uma história fascinante.
+            </p>
+        </section>
+
+        <section class="tourist-spots">
+            <div class="section-title-wrapper">
+                 <h2>Pontos Turísticos Imperdíveis</h2>
+            </div>
+           
+            <div class="spots-grid">
+                <div class="spot-card">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5xbF4YENNN22-jneASmb6ArE6doUVi2-wbA&s" alt="Vista frontal do The Alamo">
+                    <div class="spot-card-content">
+                        <h3>The Alamo</h3>
+                        <p class="location">San Antonio, TX</p>
+                        <p class="description">Marco da Revolução Texana, a missão franciscana do século XVIII é um símbolo sagrado da coragem e do sacrifício pela independência. "Remember the Alamo!"</p>
+                    </div>
+                </div>
+
+                <div class="spot-card">
+                    <img src="https://thumbs.dreamstime.com/b/gado-de-longhorn-no-distrito-hist%C3%B3rico-dos-currais-de-fort-worth-70501991.jpg" alt="Manada de gado Longhorn nas ruas de Fort Worth Stockyards">
+                    <div class="spot-card-content">
+                        <h3>Fort Worth Stockyards</h3>
+                        <p class="location">Fort Worth, TX</p>
+                        <p class="description">Experimente o verdadeiro Velho Oeste nesta área histórica, com condução de gado duas vezes ao dia, saloons autênticos e o maior honky-tonk do mundo.</p>
+                    </div>
+                </div>
+
+                <div class="spot-card">
+                    <img src="https://destinationwaco.org/wp-content/uploads/2013/05/TRHOF.jpg" alt="Fachada do Texas Ranger Hall of Fame and Museum">
+                    <div class="spot-card-content">
+                        <h3>Texas Ranger Hall of Fame</h3>
+                        <p class="location">Waco, TX</p>
+                        <p class="description">Descubra a história da mais antiga agência de aplicação da lei do estado. O museu homenageia os lendários Texas Rangers e seu papel na pacificação da fronteira.</p>
+                    </div>
+                </div>
+
+                <div class="spot-card">
+                    <img src="https://greatruns.com/wp-content/uploads/2017/05/Big-Bend-National-Park-4.jpeg" alt="Cânions e paisagem desértica do Big Bend National Park">
+                    <div class="spot-card-content">
+                        <h3>Big Bend National Park</h3>
+                        <p class="location">West Texas</p>
+                        <p class="description">Explore as paisagens áridas e montanhosas que foram refúgio para foras da lei e tribos Apache. Um cenário natural que evoca a solidão e a beleza da fronteira.</p>
+                    </div>
+                </div>
+
+                <div class="spot-card">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7sR5pQoOYaTsF30g6V-zHkwH4iv21tlXKSw&s" alt="Cowboy a cavalo em uma rua de Bandera">
+                    <div class="spot-card-content">
+                        <h3>Bandera</h3>
+                        <p class="location">Bandera, TX</p>
+                        <p class="description">Autoproclamada "Capital Mundial dos Cowboys", Bandera oferece ranchos, rodeios e uma atmosfera autêntica que transporta os visitantes diretamente para o século XIX.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="map-section">
+            <div id="map"></div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 Far West Tours. Todos os direitos reservados.</p>
+        <p>Av. Assis Brasil, 8787 - Porto Alegre/RS</p>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+    
+    <script>
+        // 1. Inicialização do Mapa
+        const map = L.map('map').setView([31.9686, -99.9018], 6); // Centro do Texas
+
+        // 2. Adição do Tile Layer (Estilo do Mapa)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        // 3. Ícone Personalizado
+        const sheriffIcon = L.icon({
+            iconUrl: 'https://img.icons8.com/ios-filled/50/FFD700/sheriff.png',
+            iconSize: [40, 40], // Tamanho do ícone
+            iconAnchor: [20, 40], // Ponto do ícone que corresponde à localização do marcador
+            popupAnchor: [0, -40] // Ponto a partir do qual o pop-up deve abrir
+        });
+
+        // 4. Dados dos Pontos Turísticos
+        const touristSpotsData = [
+            {
+                name: "The Alamo",
+                city: "San Antonio",
+                coords: [29.425967, -98.486145],
+                img: "https://images.unsplash.com/photo-1591322703593-27e135b96781?q=80&w=1932&auto=format&fit=crop",
+                desc: "Símbolo da luta pela independência do Texas."
+            },
+            {
+                name: "Fort Worth Stockyards",
+                city: "Fort Worth",
+                coords: [32.789547, -97.346870],
+                img: "https://images.unsplash.com/photo-1628124194301-35688f01b3d3?q=80&w=1974&auto=format&fit=crop",
+                desc: "Onde o espírito do gado ainda vive."
+            },
+            {
+                name: "Texas Ranger Hall of Fame",
+                city: "Waco",
+                coords: [31.554550, -97.118220],
+                img: "https://www.texasranger.org/wp-content/uploads/2022/07/TRHFM-Facility-Front-2022.jpg",
+                desc: "A história da lendária força policial."
+            },
+            {
+                name: "Big Bend National Park",
+                city: "West Texas",
+                coords: [29.2500, -103.2500],
+                img: "https://images.unsplash.com/photo-1596701956102-15ec44368541?q=80&w=2070&auto=format&fit=crop",
+                desc: "A fronteira selvagem e deslumbrante."
+            },
+            {
+                name: "Bandera",
+                city: "Bandera",
+                coords: [29.7280, -99.0731],
+                img: "https://www.texashighways.com/wp-content/uploads/2021/04/bandera-arion-guest-ranch-a.jpg",
+                desc: "A Capital Mundial dos Cowboys."
+            }
+        ];
+
+        // 5. Adicionar Marcadores ao Mapa
+        touristSpotsData.forEach(spot => {
+            const marker = L.marker(spot.coords, {icon: sheriffIcon}).addTo(map);
+            
+            // Conteúdo do Pop-up
+            const popupContent = `
+                <h4>${spot.name}</h4>
+                <p><strong>${spot.city}</strong></p>
+                <p>${spot.desc}</p>
+                <img src="${spot.img}" alt="${spot.name}" style="width:150px; border-radius:5px;">
+            `;
+            
+            marker.bindPopup(popupContent);
+        });
+
+    </script>
+</body>
+</html>
